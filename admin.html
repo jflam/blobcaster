@@ -11,8 +11,6 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
 <meta name="theme-color" content="#563d7c">
-
-
     <style>
 	  body {
 		padding-top:100px;
@@ -33,9 +31,6 @@
         }
       }
     </style>
-    <!-- Custom styles for this template -->
-
-	
 <script>
 
 Date.prototype.toDateInputValue = (function() {
@@ -44,57 +39,50 @@ Date.prototype.toDateInputValue = (function() {
     return local.toJSON().slice(0,10);
 });
 
-
 function pubDate(dateStr) {
+	var dateParts = dateStr.split("-");
+	var date = new Date(dateParts[0], parseInt(dateParts[1]) - 1, dateParts[2])
+	var pieces = date.toString().split(' '),
+		offsetTime = pieces[5].match(/[-+]\d{4}/),
+		offset = (offsetTime) ? offsetTime : pieces[5],
+		parts = [
+			pieces[0] + ',',
+			pieces[2],
+			pieces[1],
+			pieces[3],
+			pieces[4]
+		];
 
-   var dateParts = dateStr.split("-");
-000
-  var date = new Date(dateParts[0],parseInt(dateParts[1]) - 1,dateParts[2])
-
-
-  var pieces     = date.toString().split(' '),
-      offsetTime = pieces[5].match(/[-+]\d{4}/),
-      offset     = (offsetTime) ? offsetTime : pieces[5],
-      parts      = [
-        pieces[0] + ',',
-        pieces[2],
-        pieces[1],
-        pieces[3],
-        pieces[4]
-      ];
-
-  return parts.join(' ');
+	return parts.join(' ');
 }
 
 var episodes;
 var blobService;
 
 function setCookie(cname, cvalue, exdays) {
-  var d = new Date();
-  d.setTime(d.getTime() + (exdays*24*60*60*1000));
-  var expires = "expires="+ d.toUTCString();
-  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+	var d = new Date();
+	d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+	var expires = "expires=" + d.toUTCString();
+	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
 function getCookie(cname) {
-  var name = cname + "=";
-  var decodedCookie = decodeURIComponent(document.cookie);
-  var ca = decodedCookie.split(';');
-  for(var i = 0; i <ca.length; i++) {
-    var c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return "";
+	var name = cname + "=";
+	var decodedCookie = decodeURIComponent(document.cookie);
+	var ca = decodedCookie.split(';');
+	for (var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
 }
 
-
 function login(){
-
 	if(document.getElementById("remember").checked){
 		setCookie("account", document.getElementById('accountName').value, 365);
 		setCookie("sasToken", document.getElementById('sasToken').value, 365);	
@@ -105,9 +93,6 @@ function login(){
 
 	var blobUri = 'https://' + document.getElementById('accountName').value + '.blob.core.windows.net';
 	blobService = AzureStorage.Blob.createBlobServiceWithSas(blobUri, document.getElementById('sasToken').value);		
-
-
-
 	blobService.getContainerMetadata('$web', function(error, result, response) {
 		finishedOrError = true;
 		if (error) {
@@ -121,12 +106,9 @@ function login(){
 			$('#logonModal').modal('hide');
 		}
 	});	
-
 }
 
 function init(){	
-	//document.getElementById("episodeDate").value = new Date().toDateInputValue();
-	
 	var account = getCookie("account");
 	if (account != "") {
 		 document.getElementById('accountName').value = account;
@@ -135,24 +117,18 @@ function init(){
 	}	
 	
 	$('#logonModal').modal('show')
-	
 }
 
 function listEpisodes(){
-
 	blobService.listBlobsSegmentedWithPrefix("$web", "episodes", null,{include:"metadata"}, function (error, results) {
 		if (error) {;
 			alert(error.message)
 		} else {
-			
 			var episodeTable = document.getElementById("episodeTable");
-		
 			episodeTable.innerHTML = "";
-		
 			episodes = results.entries;
 		
 			for (var i = 0, episode; episode = results.entries[i]; i++) {	
-			
 				episodeTable.innerHTML += `<div class="row mb-3">
 <div class="col-2 themed-grid-col"><input class="form-control" type="text" value="${episode.metadata.name}" id="episodeName${i}"></div>
 <div class="col-2 themed-grid-col"><input class="form-control" type="date" value="${episode.metadata.date}" id="episodeDate${i}"></div>
@@ -169,79 +145,66 @@ function listEpisodes(){
 		writePodcastXML();
 		writeIndexHTML();
 	});
-
-
-
 }
 
 function addEpisode(){
-	if(document.getElementById('episodeFile').files.length < 1){
+	if (document.getElementById('episodeFile').files.length < 1) {
 		alert("Please select a file.")
-	}else{
-
+	} else {
 		var file = document.getElementById('episodeFile').files[0];
-		
 		var reader = new FileReader();
 		reader.onload = function (e) {
 			var a = document.createElement('audio');
 			document.body.appendChild(a);
 			a.src = e.target.result;
-			
-            a.addEventListener('loadedmetadata', function(){
-                var duration = a.duration;
-				
-				document.body.removeChild(a);	
+			a.addEventListener('loadedmetadata', function () {
+				var duration = a.duration;
 
-				var meta={
-					name:document.getElementById('episodeName').value,
-					description:document.getElementById('episodeDescription').value,
+				document.body.removeChild(a);
+				var meta = {
+					name: document.getElementById('episodeName').value,
+					description: document.getElementById('episodeDescription').value,
 					date: document.getElementById('episodeDate').value,
 					duration: duration
 				}
-				
+
 				$("#newEpisodeForm").hide();
 				$("#uploadProgress").show();
 				$("#addEpisodeCancelButton").hide();
 				$("#addEpisodeUploadButton").hide();
-				
+
 				var uploadOrError = false;
-				
+
 				var customBlockSize = file.size > 1024 * 1024 * 32 ? 1024 * 1024 * 4 : 1024 * 512;
 				blobService.singleBlobPutThresholdInBytes = customBlockSize;
 
-				var speedSummary = blobService.createBlockBlobFromBrowserFile('$web', "episodes/" + file.name, file, {metadata : meta, blockSize : customBlockSize}, function(error, result, response) {				
-					
+				var speedSummary = blobService.createBlockBlobFromBrowserFile('$web', "episodes/" + file.name, file, { metadata: meta, blockSize: customBlockSize }, function (error, result, response) {
 					var uploadOrError = true;
-					var msg="Upload successful."
+					var msg = "Upload successful."
 					if (error) {
-						msg = error.message;						
-					} 			
-
+						msg = error.message;
+					}
 					$("#uploadLabel").html(msg);
 					$("#addEpisodeOKButton").show();
-				
-					
-					listEpisodes();			
-					
+					listEpisodes();
 				});
 
-				var doProgress = function(){
+				var doProgress = function () {
 					var progress = speedSummary.getCompletePercent();
-					if(uploadOrError) progress = 100;
-					$("#uploadProgressBar").css('width', progress+'%').attr('aria-valuenow', progress);				
-					if(!uploadOrError){
-						setTimeout(function(){ 
+					if (uploadOrError) progress = 100;
+					$("#uploadProgressBar").css('width', progress + '%').attr('aria-valuenow', progress);
+					if (!uploadOrError) {
+						setTimeout(function () {
 							doProgress();
 						}, 200);
 					}
 				}
 				doProgress();
-			
-				
-            },false);			
+
+
+			}, false);
 		}
-		reader.readAsDataURL(file);		
-		
+		reader.readAsDataURL(file);
 	}
 }
 
@@ -323,23 +286,31 @@ function savePodcastMeta(){
 
 function writePodcastXML(){
 var template = `<?xml version="1.0" encoding="UTF-8"?>
-<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/" xmlns:podcast="https://podcastindex.org/namespace/1.0">
 <channel>
-<title>~title~</title>
-<link>~link~</link>
-<language>~language~</language>
-<itunes:subtitle>~itunes_subtitle~</itunes:subtitle>
-<itunes:author>~itunes_author~</itunes:author>
-<itunes:summary>~itunes_summary~</itunes:summary>
-<description>~description~</description>
-<copyright>~copyright~</copyright>
+<title>Pivotal Moments with John Lam</title>
+<description>Achieve your career and life goals sooner by learning from the pivotal moments of my guests. Each Monday a new guest, mostly working in tech and Microsoft, will share with you pivotal stories from their careers and lives and the lessons they learned. Hosted by John Lam.</description>
+<copyright>2022-23 John Lam</copyright>
+<language>en</language>
+<pubDate>Mon, 15 Aug 2022 07:00:00 +0000</pubDate>
+<lastBuildDate>Mon, 31 Jul 2023 00:12:16 +0000</lastBuildDate>
+<image>
+  <link>https://notes.iunknown.com/podcast/Pivotal+Moments</link>
+  <title>Pivotal Moments with John Lam</title>
+  <url>https://jlampodcast.z19.web.core.windows.net/podcast-cover-art.jpg"</url>
+</image>
+<itunes:new-feed-url>https://jlampodcast.z19.web.core.windows.net/rss.xml</itunes:new-feed-url>
 <itunes:owner>
-    <itunes:name>~itunes_name~</itunes:name>
-    <itunes:email>~itunes_email~</itunes:email>
+	<itunes:name>John Lam</itunes:name>
+	<itunes:email>jlam@iunknown.com</itunes:email>
 </itunes:owner>
-<itunes:explicit>~itunes_explicit~</itunes:explicit>
-<itunes:image href="~itunes_image~" />
-<itunes:category text="~itunes_category~"/>
+<itunes:category text="Technology"/>
+<itunes:category text="Education">
+	<itunes:category text="Self-Improvement"/>
+</itunes:category>
+<itunes:category text="Business">
+	<itunes:category text="Careers"/>
+</itunes:category>
 ~items~
 </channel>
 </rss>`
@@ -349,7 +320,6 @@ var template = `<?xml version="1.0" encoding="UTF-8"?>
 		var re = new RegExp("~" + kvp.id + "~","g");
 		template = template.replace(re, kvp.value);
 	};
-
 
 var itemTemplate = `<item>
     <title>~title~</title>
@@ -366,28 +336,20 @@ var itemTemplate = `<item>
 </item>`
 
 	var root = location.protocol + '//' + location.host + "/";
-
-
 	if (document.getElementById("endpoint").value != ""){
 		root = document.getElementById("endpoint").value;
 	}
 
-
 	var items = "";
-
 	for (var i = 0, episode; episode = episodes[i]; i++) {
-	
 		var hours = Math.floor(episode.metadata.duration / 3600);
 		var minutes = Math.floor(episode.metadata.duration /60) - (hours * 60);
 		var seconds = Math.floor(episode.metadata.duration % 60);
-		
 		var duration = "";
 		
 		hours.toString().length == 1 ? duration += "0" + hours + ":" : duration += hours + ":"
 		minutes.toString().length == 1 ? duration += "0" + minutes + ":" : duration += minutes + ":"
 		seconds.toString().length == 1 ? duration += "0" + seconds : duration += seconds
-		
-		
 	
 		var item = itemTemplate;
 		item = item.replace(/~title~/g, episode.metadata.name);
@@ -417,8 +379,6 @@ var itemTemplate = `<item>
 			alert("Could save RSS: " + error.message);
 		}
 	});		
-	
-
 }
 
 function writeIndexHTML(){
@@ -430,11 +390,8 @@ function writeIndexHTML(){
 		}
 	
 		var root = location.protocol + '//' + location.host + "/";
-
 		var items = "";
-
 		for (var i = 0, episode; episode = episodes[i]; i++) {
-		
 			if (i % 3 == 0){
 				items += '<div class="row">'
 			}
@@ -442,7 +399,6 @@ function writeIndexHTML(){
 			var hours = Math.floor(episode.metadata.duration / 3600);
 			var minutes = Math.floor(episode.metadata.duration /60) - (hours * 60);
 			var seconds = Math.floor(episode.metadata.duration % 60);
-			
 			var duration = "";
 			
 			hours.toString().length == 1 ? duration += "0" + hours + ":" : duration += hours + ":"
@@ -464,7 +420,6 @@ function writeIndexHTML(){
 			if (i % 3 == 2){
 				items += '</div>'
 			}		
-			
 		}
 		
 		if (i % 3 != 2){
@@ -472,7 +427,6 @@ function writeIndexHTML(){
 		}		
 		
 		template = template.replace("~items~", items);
-		
 		
 		var options = {
 			contentSettings: {
@@ -485,15 +439,11 @@ function writeIndexHTML(){
 				alert("Could save index.html: " + error.message);
 			}
 		});		
-
 	});
 }
 
 </script>	
-	
   </head>
-  
-    
   <body onload="init()">
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
   <a class="navbar-brand" href="#">Blobcaster</a>
@@ -512,10 +462,6 @@ function writeIndexHTML(){
       <li class="nav-item active">
         <a class="nav-link" target="_blank" href="/rss.xml">📜 Podcast XML</a>
       </li>
-	  
-	  
-	  
-	  
     </ul>
   </div>
 </nav>
@@ -552,7 +498,6 @@ function writeIndexHTML(){
 		  </div>
 		</form>	  
 	  
-	  
       </div>
       <div class="modal-footer">
         <button type="button"  onclick="login()" class="btn btn-primary">Login</button>
@@ -561,7 +506,6 @@ function writeIndexHTML(){
   </div>
 </div>
 
-
 <div class="modal fade" id="newEpisodeModal" tabindex="-1" role="dialog" aria-labelledby="newEpisodeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -569,7 +513,6 @@ function writeIndexHTML(){
         <h5 class="modal-title" id="newEpisodeModalLabel">New Episode</h5>
       </div>
       <div class="modal-body">
-	  
 		<form id="newEpisodeForm">
 		  <div class="form-group">
 			<label for="accountName">Episode</label>
@@ -595,9 +538,6 @@ function writeIndexHTML(){
 			  <div  id="uploadProgressBar" class="progress-bar progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
 			</div>			
 		</div>
-	  
-	  
-	  
       </div>
       <div class="modal-footer">
         <button type="button" id="addEpisodeUploadButton" onclick="addEpisode()" class="btn btn-primary">Add Episode</button>
@@ -608,9 +548,6 @@ function writeIndexHTML(){
   </div>
 </div>
 
-
-
-
 <div class="modal fade" id="editPodcastMetaModal" tabindex="-1" role="dialog" aria-labelledby="editPodcastMetaModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -618,11 +555,7 @@ function writeIndexHTML(){
         <h5 class="modal-title" id="editPodcastMetaModalLabel">Podcast Metadata</h5>
       </div>
       <div class="modal-body">
-	  
 		<form id="podcastMeta">		
-		
-
-
 		
 		  <div class="form-group">
 			<label for="title">Primary Endpoint</label>
@@ -680,11 +613,7 @@ function writeIndexHTML(){
 			<label for="itunes_category">iTunes Category</label>
 			<input type="text"   class="form-control form-control-sm" id="itunes_category" placeholder="The category for your podcast.">
 		  </div>		    
-		  
-		  
 		</form>	  
-	  
-	  
       </div>
       <div class="modal-footer">
 		<button type="button"  onclick="savePodcastMeta()" class="btn btn-primary">Save</button>
@@ -697,6 +626,5 @@ function writeIndexHTML(){
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script></body>
-
 <script src="azure-storage.blob.min.js"></script>
 </html>
