@@ -289,6 +289,7 @@ var template = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/" xmlns:podcast="https://podcastindex.org/namespace/1.0">
 <channel>
 <title>Pivotal Moments with John Lam</title>
+<link>https://notes.iunknown.com/podcast/Pivotal+Moments</link>
 <description>Achieve your career and life goals sooner by learning from the pivotal moments of my guests. Each Monday a new guest, mostly working in tech and Microsoft, will share with you pivotal stories from their careers and lives and the lessons they learned. Hosted by John Lam.</description>
 <copyright>2022-23 John Lam</copyright>
 <language>en</language>
@@ -297,9 +298,11 @@ var template = `<?xml version="1.0" encoding="UTF-8"?>
 <image>
   <link>https://notes.iunknown.com/podcast/Pivotal+Moments</link>
   <title>Pivotal Moments with John Lam</title>
-  <url>https://jlampodcast.z19.web.core.windows.net/podcast-cover-art.jpg"</url>
+  <url>https://jlampodcast.z19.web.core.windows.net/podcast-cover-art.jpg</url>
 </image>
+<itunes:image>https://jlampodcast.z19.web.core.windows.net/podcast-cover-art.jpg</itunes:image>
 <itunes:new-feed-url>https://jlampodcast.z19.web.core.windows.net/rss.xml</itunes:new-feed-url>
+<itunes:explicit>False</itunes:explicit>
 <itunes:owner>
 	<itunes:name>John Lam</itunes:name>
 	<itunes:email>jlam@iunknown.com</itunes:email>
@@ -325,13 +328,13 @@ var itemTemplate = `<item>
     <title>~title~</title>
     <itunes:summary>~description~</itunes:summary>
     <description>~description~</description>
-    <link>~link~</link>
-	<language>~language~</language>
+    <link>https://notes.iunknown.com/podcast/Pivotal+Moments</link>
+	<language>en</language>
     <enclosure url="~fileurl~" type="audio/mpeg" length="~length~"></enclosure>
     <pubDate>~date~</pubDate>
-    <itunes:author>~author~</itunes:author>
+    <itunes:author>John Lam</itunes:author>
     <itunes:duration>~duration~</itunes:duration>
-    <itunes:explicit>~explicit~</itunes:explicit>
+    <itunes:explicit>False</itunes:explicit>
     <guid>~fileurl~</guid>
 </item>`
 
